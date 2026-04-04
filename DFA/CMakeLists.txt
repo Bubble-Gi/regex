@@ -1,0 +1,1 @@
+add_library(DFA STATIC minDFA.h minDFA.cpp)

@@ -1,0 +1,1 @@
+add_library(reg STATIC regex.cpp regex.h)

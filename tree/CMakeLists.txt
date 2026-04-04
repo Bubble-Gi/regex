@@ -1,0 +1,1 @@
+add_library(ST STATIC tree.h tree.cpp DFA.cpp DFA.h)
