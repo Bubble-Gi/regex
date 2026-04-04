@@ -126,9 +126,8 @@ void Tree::parsing(std::string& str) {
     str.append(".#");
     for (size_t i = 0; i < str.length(); ++i) {
         char ch = str[i];
-        std::cout << ch << std::endl;
         if (isalpha(ch) || screening != 0) {
-            Operands.push(std::move(make_a_node(ch))); std::cout << "зашли записали букву" << ch << std::endl;
+            Operands.push(std::move(make_a_node(ch)));
             screening = false;
         }
 
@@ -137,23 +136,16 @@ void Tree::parsing(std::string& str) {
             while (!Operators.empty() && priority(ch) <= priority(Operators.top()) && ch != '*' && ch != '.') {
                 Operands.push(std::move(get_operator(Operators.top())));
                 Operators.pop();
-                std::cout << "зашли создали дерево" << std::endl;
             }
             if (ch == '*') Operands.push(std::move(get_operator(ch)));
 
             if (ch == '.' && i+2  < str.length() && str[i+1]  == '.' && str[i+2]  == '.') {
-                std::cout << "3 точки" << std::endl;
                 Operands.push(std::move(get_operator('*')));
-                std::cout << "преобразовали ... в *" << std::endl;
                 i += 3;
-                std::cout << i << std::endl;
             } else if (ch == '.' && (str[i+1] != '.' || i++ >= str.length())) {
-                std::cout << "1 точка" << std::endl;
-                std::cout << Operators.size() << std::endl;
                 while (!Operators.empty() && priority(ch) <= priority(Operators.top())) {
                     Operands.push(std::move(get_operator(Operators.top())));
                     Operators.pop();
-                    std::cout << "зашли создали дерево" << std::endl;
                 }
             }
             Operators.push(ch);
@@ -161,29 +153,19 @@ void Tree::parsing(std::string& str) {
 
         else if (ch == '(') {
             Operators.push(std::move(ch));
-            std::cout << "зашли записали в стек (" << std::endl;
         }
         else if (ch == ')') {
-            std::cout << "ращли сюда" << std::endl;
             while (!Operators.empty() && Operators.top() != '(') {
-                std::cout << "ращли сюда" << std::endl;
                 Operands.push(std::move(get_operator(Operators.top())));
                 Operators.pop();
-                std::cout << "создали ноду между ()" << std::endl;
             }
             if (!Operators.empty() && Operators.top() == '(') Operators.pop();
         }
         else if (ch == '#') {
-            std::cout << "#1" << std::endl;
             Operands.push(std::move(make_a_node(ch)));
-            std::cout << "#2" << std::endl;
             while (!Operators.empty()) {
-                std::cout << "#3" << std::endl;
-                std::cout << Operators.top() << std::endl;
                 Operands.push(std::move(get_operator(Operators.top())));
-                std::cout << "#4" << std::endl;
                 Operators.pop();
-                std::cout << "#5" << std::endl;
             }
         } else if (ch == '%') screening = true;
 
@@ -191,8 +173,7 @@ void Tree::parsing(std::string& str) {
             i++;
             std::string tmp;
             while (i != str.length() && str[i] != ']' ) tmp.push_back(str[i++]);
-            std::cout << tmp << std::endl;
-            if (i == str.length()) throw std::invalid_argument("] нету");
+            if (i == str.length()) throw std::invalid_argument("] нет");
             make_range1(tmp);
         }
 
@@ -200,8 +181,7 @@ void Tree::parsing(std::string& str) {
             i++;
             std::string tmp;
             while (i != str.length() && str[i] != '}' ) tmp.push_back(str[i++]);
-            std::cout << tmp << std::endl;
-            if (i == str.length()) throw std::invalid_argument("} нету");
+            if (i == str.length()) throw std::invalid_argument("} нет");
             make_range2(tmp);
         }
 
@@ -210,7 +190,6 @@ void Tree::parsing(std::string& str) {
         }
         else throw std::invalid_argument("не известный символ");
     }
-    std::cout << "мб собрали дерево" << std::endl;
     exportToGraphviz("id.dot", Operands.top());
     alphabet.erase('#');
     ptintFP();
@@ -295,20 +274,14 @@ void Tree::make_range1(std::string& str) {
     for (size_t it = 0; it < str.length(); it++) {
         if (it+1 < str.length() && str[it+1] == '-' && it+2 < str.length()) {
             unsigned char a1 = str[it];
-            std::cout << a1 << std::endl;
             unsigned char an = str[it+2];
-            std::cout << an << std::endl;
             if (a1 > an) throw std::invalid_argument("[a1 > an]");
             for (int i = a1; i <= an; i++) {
-                std::cout << i << std::endl;
                 Operands.push(std::move(make_a_node(i)));
                 if (create == 1) {
-                    std::cout << Operands.size() << std::endl;
                     Operands.push(std::move(get_operator('|')));
-                    std::cout << "создали" << std::endl;
                 }
                 create = true;
-                std::cout << "установили тру" << std::endl;
             }
             it += 2;
         }

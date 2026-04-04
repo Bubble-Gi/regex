@@ -21,6 +21,15 @@ int main() {
         } else {
             std::cout << "NOT OK" << std::endl;
         }
+        std::string rec = r.recoveryy();
+        std::cout << rec << std::endl;
+        Regex r2("L.(L|D)*");
+        bool eq = r.equile(r2);
+        if (eq) {
+            std::cout << "eq" << std::endl;
+        } else {
+            std::cout << "NOT eq" << std::endl;
+        }
 
 
         // std::cout << "enter string: ";

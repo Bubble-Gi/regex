@@ -13,11 +13,17 @@ class Regex {
         d.printDFA();
         return DFA(d.get_transitions(), d.get_finaly_states(), d.get_start_state(), d.get_alphabet(), d.get_all_states());
     }
+    std::map<std::pair<std::pair<int, int>, char>, std::pair<int, int>> mul;
+    std::unordered_set<char> new_alphabet;
+    std::pair<int,int> new_start_state;
+
 
 public:
     Regex(std::string str) : automat(buildDFA(str)) {}
     void compile(std::string str) { automat = buildDFA(str); }
     bool match(std::string& str) { return automat.match(str); }
-    //void get_size_tr() { automat.size_tr(); }
-    //void get_inv_transit(const std::string& str) {automat.reverse_transitions(); automat.draw_inverse_dfa(str); }
+    std::string recoveryy() { return automat.recovery(); }
+    bool equile(Regex& r2);
+    void mul_automats(Regex& r2);
+    bool DFS(std::map<std::pair<int, char>, int>& ntm, std::set<int>& fs, int ss, std::set<int>& v);
 };
