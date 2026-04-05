@@ -90,14 +90,40 @@ void DFABuilder::minimization_by_Hopcroft() {
             P = std::move(new_P);
         }
     }
-    // for (int i = 0; i < P.size(); ++i) {
-    //     if (P[i].contains(1)) start_state = i;
-    // }
+    std::map<int, int> tr;
+    for (int i = 0; i < P.size(); i++) {
+        for (auto p : P[i]) {
+            tr[p] = i;
+        }
+        if (finaly_states.contains(*P[i].begin())) new_finaly_states.insert(i);
+    }
+    for (int i = 0; i < P.size(); i++) {
+        for (auto ch : get_alphabet()) {
+            new_map_tran[{i,ch}] = tr[transitions[{*P[i].begin(),ch}]];
+        }
+    }
+    start_state = tr[0];
+
+    for (int i = 0; i < P.size(); i++) {
+        new_all_states.insert(i);
+    }
+
+    for (auto p : new_all_states) {
+        bool f = false;
+        for (auto ch : get_alphabet()) {
+            if (new_map_tran.contains({p,ch})) {
+                if (new_map_tran[{p, ch}] != p) {
+                    f = true;
+                }
+            }
+        }
+        if (!f) deadlock_state = p;
+    }
     draw_minimized_dfa("min.dot");
 }
 
 
-void DFABuilder::printDFA() const{
+void DFABuilder::printDFA(){
     for (auto& p : help_set) {
         std::cout << p.second << " {";
         for (auto a : p.first) {
@@ -133,34 +159,54 @@ std::set<int> DFABuilder::difference_sets(std::set<int>& A, std::set<int>& B) {
 
 void DFABuilder::draw_minimized_dfa(const std::string& filename) {
     std::ofstream out(filename);
+    if (!out.is_open()) return;
+
     out << "digraph MinimizedDFA {\n";
     out << "    rankdir=LR;\n";
-    for (size_t i = 0; i < P.size(); ++i) {
-        bool is_final = false;
-        std::string label = "{";
-        for (int s : P[i]) {
-            if (finaly_states.count(s)) is_final = true;
-            label += " " + std::to_string(s);
-        }
-        label += " }";
+    out << "    node [fontname=\"Helvetica\", shape=circle];\n";
+    out << "    edge [fontname=\"Helvetica\"];\n";
 
-        out << "    " << i << " [shape = " << (is_final ? "doublecircle" : "circle")
-            << ", label = \"" << label << "\"];\n";
+    // 1. Входная стрелка для начального состояния
+    out << "    start [shape=none, label=\"\"];\n";
+    out << "    start -> " << start_state << ";\n";
+
+    // 2. Отрисовка НОВЫХ состояний (индексов в P)
+    for (size_t i = 0; i < P.size(); ++i) {
+        // Проверяем финальность по новому сету
+        bool is_final = new_finaly_states.count(i);
+
+        // Формируем метку, показывающую состав группы состояний
+        std::string label = "Node " + std::to_string(i) + "\\n{";
+        for (auto it = P[i].begin(); it != P[i].end(); ++it) {
+            label += std::to_string(*it) + (std::next(it) != P[i].end() ? "," : "");
+        }
+        label += "}";
+
+        out << "    " << i << " [shape=" << (is_final ? "doublecircle" : "circle")
+            << ", label=\"" << label << "\""
+            << (i == start_state ? ", color=blue, penwidth=2" : "") << "];\n";
     }
 
-    for (size_t i = 0; i < P.size(); ++i) {
-        int rep = *P[i].begin();
-        for (char c : t.get_alphabet()) {
-            if (transitions.count({rep, c})) {
-                int old_target = transitions[{rep, c}];
-                for (size_t j = 0; j < P.size(); ++j) {
-                    if (P[j].count(old_target)) {
-                        out << "    " << i << " -> " << j << " [label = \"" << c << "\"];\n";
-                        break;
-                    }
-                }
-            }
+    // 3. Группировка переходов (чтобы не было лишних стрелок)
+    // Map: {откуда, куда} -> "символ1, символ2..."
+    std::map<std::pair<int, int>, std::string> aggregated_edges;
+    for (auto const& [key, target] : new_map_tran) {
+        int from = key.first;
+        char symbol = key.second;
+
+        if (aggregated_edges[{from, target}].empty()) {
+            aggregated_edges[{from, target}] = std::string(1, symbol);
+        } else {
+            aggregated_edges[{from, target}] += ", " + std::string(1, symbol);
         }
     }
+
+    // 4. Отрисовка сгруппированных переходов
+    for (auto const& [nodes, labels] : aggregated_edges) {
+        out << "    " << nodes.first << " -> " << nodes.second
+            << " [label=\"" << labels << "\"];\n";
+    }
+
     out << "}\n";
+    out.close();
 }

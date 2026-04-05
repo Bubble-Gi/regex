@@ -17,22 +17,30 @@ class DFABuilder{
     std::vector<std::set<int>> P; //разбиение
     std::list<std::set<int>> W; //очередь
     int start_state = 0;
+    int deadlock_state;
+    std::set<int> new_finaly_states;
+    std::map<std::pair<int, char>, int> new_map_tran;
+    std::set<int> new_all_states;
+    bool is_inverse;
 
 public:
+    DFABuilder(bool is_inverse = false ) : is_inverse(is_inverse) {}
     void makeDFA();
-    void printDFA() const;
-    void make_tree(std::string str) { t.parsing(str); }
+    void printDFA();
+    void make_tree(std::string str) { t.parsing(str, is_inverse); }
     void minimization_by_Hopcroft();
     std::set<int> intersection_sets(std::set<int>& A, std::set<int>& B);
     std::set<int> difference_sets(std::set<int>& A, std::set<int>& B);
     void draw_original_dfa(const std::string& filename);
     void draw_minimized_dfa(const std::string& filename);
 
-    std::map<std::pair<int, char>, int>& get_transitions() { return transitions;}
-    std::set<int>& get_finaly_states() {return finaly_states;}
+    std::map<std::pair<int, char>, int>& get_transitions() { return new_map_tran;}
+    std::set<int>& get_finaly_states() {return new_finaly_states;}
     int& get_start_state() { return start_state;}
     std::unordered_set<char>& get_alphabet() {return t.get_alphabet();}
-    std::set<int>& get_all_states() { return all_states; }
+    std::set<int>& get_all_states() { return new_all_states; }
+    std::unique_ptr<Node>& get_roooot() { return t.get_unique_root();}
+    int &get_deadlock() {return deadlock_state;}
 
 
 };
