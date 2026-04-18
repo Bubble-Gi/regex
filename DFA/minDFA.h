@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 class DFA {
     std::map<std::pair<int, char>, int> transitions; // состояние, символ, куда переходим
@@ -15,10 +16,11 @@ class DFA {
     int deadlock;
     //восстановление
     std::map<std::pair<int, int>, std::string> recovery_transitions; //откуда, куда, что на ребре
+    std::unique_ptr<DFA> lookahead;
 
 public:
-    DFA(std::map<std::pair<int, char>, int>& transitions, std::set<int>& f_states, int s, std::unordered_set<char>& alph, std::set<int>& states, int dd) : transitions(std::move(transitions)), finaly_states(std::move(f_states)), start_state(s), alphabet(std::move(alph)), all_states(std::move(states)), deadlock(dd) {}
-    bool match(std::string& str);
+    DFA(std::map<std::pair<int, char>, int>& transitions, std::set<int>& f_states, int s, std::unordered_set<char>& alph, std::set<int>& states, int dd, std::unique_ptr<DFA> lookaheaddd = nullptr ) : transitions(std::move(transitions)), finaly_states(std::move(f_states)), start_state(s), alphabet(std::move(alph)), all_states(std::move(states)), deadlock(dd), lookahead(std::move(lookaheaddd)) {}
+    bool match(std::string str);
 
     std::string recovery();
     std::map<std::pair<int, char>, int>& transitionss() { return transitions; }

@@ -24,8 +24,7 @@ std::unique_ptr<Node> Tree::make_e_node(char ch) {
     n->nullable = true;
     n->firstpos = {};
     n->lastpos = {};
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_a_node(char ch) {
     auto n = std::make_unique<Node>();
@@ -38,8 +37,7 @@ std::unique_ptr<Node> Tree::make_a_node(char ch) {
     n->lastpos = {pos};
     alphabet.insert(ch);
     char_position[pos] = ch;
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_or_node(char ch) {
     auto n = std::make_unique<Node>();
@@ -55,11 +53,9 @@ std::unique_ptr<Node> Tree::make_or_node(char ch) {
 
     n->firstpos = n->left->firstpos; n->firstpos.insert(n->right->firstpos.begin(), n->right->firstpos.end());
     n->lastpos = n->left->lastpos; n->lastpos.insert(n->right->lastpos.begin(), n->right->lastpos.end());
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_cat_node(char ch) {
-    std::cout << "ne popa" << std::endl;
     auto n = std::make_unique<Node>();
     n->type = CAT;
     n->right = std::move(Operands.top());
@@ -80,11 +76,9 @@ std::unique_ptr<Node> Tree::make_cat_node(char ch) {
     for (auto i : n->left->lastpos) {
         followpos[i].insert(n->right->firstpos.begin(), n->right->firstpos.end());
     }
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_inv_cat_node(char ch) {
-    std::cout << "popa" << std::endl;
     auto n = std::make_unique<Node>();
     n->type = CAT;
     n->left = std::move(Operands.top());
@@ -105,8 +99,7 @@ std::unique_ptr<Node> Tree::make_inv_cat_node(char ch) {
     for (auto i : n->left->lastpos) {
         followpos[i].insert(n->right->firstpos.begin(), n->right->firstpos.end());
     }
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_star_node(char ch) {
     auto n = std::make_unique<Node>();
@@ -124,8 +117,7 @@ std::unique_ptr<Node> Tree::make_star_node(char ch) {
         followpos[i].insert(n->right->firstpos.begin(), n->right->firstpos.end());
     }
 
-    return n;
-}
+    return n;}
 
 std::unique_ptr<Node> Tree::make_plus_node(char ch) {
     auto n = std::make_unique<Node>();
@@ -145,12 +137,11 @@ std::unique_ptr<Node> Tree::make_plus_node(char ch) {
         followpos[i].insert(n->right->firstpos.begin(), n->right->firstpos.end());
     }
 
-    return n;
-}
+    return n;}
 
 void Tree::parsing(std::string& str, bool inv) {
+    if (str.empty()) { Operands.push(std::move(make_a_node('#'))); exportToGraphviz("id.dot", Operands.top()); alphabet.erase('#'); return; }
     std::string new_string = cat_string(str);
-    std::cout << new_string <<std::endl;
     if (!inv) new_string.append(".#");
     for (size_t i = 0; i < new_string.length(); ++i) {
         char ch = new_string[i];
@@ -218,11 +209,13 @@ void Tree::parsing(std::string& str, bool inv) {
         }
         else throw std::invalid_argument("не известный символ");
     }
-    if (inv) { Operands.push(std::move(make_a_node('#'))); Operands.push(std::move(get_operator('.')));}
+    // if (inv) { Operands.push(std::move(make_a_node('#'))); Operands.push(std::move(get_operator('.')));}
 
+    if (str.empty() && inv) Operands.push(std::move(make_a_node('#')));
+    else if (inv) { Operands.push(std::move(make_a_node('#'))); Operands.push(std::move(get_operator('.')));}
     exportToGraphviz("id.dot", Operands.top());
     alphabet.erase('#');
-    ptintFP();
+    //ptintFP();
 }
 
 bool Tree::is_operator(char& ch) {
@@ -284,19 +277,19 @@ void Tree::exportToGraphviz(const std::string& filename, const std::unique_ptr<N
     out.close();
 }
 
-void Tree::ptintFP() const {
-    for (auto [i, j] : followpos) {
-        std::cout << i << ": " ;
-        for (auto v : j) {
-            std::cout  << v << ", ";
-        }
-        std::cout << std::endl;
-    }
-
-    for (auto i : alphabet) std::cout << i << " "; std::cout << std::endl;
-
-    for (auto j : char_position) std::cout << j.first << ": " << j.second << std::endl;
-}
+// void Tree::ptintFP() const {
+//     for (auto [i, j] : followpos) {
+//         std::cout << i << ": " ;
+//         for (auto v : j) {
+//             std::cout  << v << ", ";
+//         }
+//         std::cout << std::endl;
+//     }
+//
+//     for (auto i : alphabet) std::cout << i << " "; std::cout << std::endl;
+//
+//     for (auto j : char_position) std::cout << j.first << ": " << j.second << std::endl;
+// }
 
 void Tree::make_range1(std::string& str) {
     if (str.empty()) return;
@@ -317,7 +310,7 @@ void Tree::make_range1(std::string& str) {
         }
         else {
             Operands.push(std::move(make_a_node(str[it])));
-            Operands.push(std::move(get_operator('|')));
+            if (create == 1) Operands.push(std::move(get_operator('|')));
             create = true;
         }
     }
@@ -385,7 +378,7 @@ bool Tree::alpha(char ch) {
 }
 
 bool Tree::alpha$(char ch) {
-    if (!is_operator(ch) && ch != '(' && ch != ')' && ch != '{' && ch != '}' && ch != '[' && ch != ']' && ch != '%' && ch != '#') {
+    if (!is_operator(ch) && ch != '(' && ch != ')' && ch != '{' && ch != '}' && ch != '[' && ch != ']' && ch != '#' && ch != '%' ) {
         return true;
     }
     return false;
@@ -397,7 +390,7 @@ std::string Tree::cat_string(std::string& str) {
     for (size_t q = 0; q < str.length(); ++q) {
         char i = str[q];
         res.push_back(i);
-        if (q+1 < str.length()) {
+        if (q+1 < str.length() || q+2 < str.length()) {
             if ((alpha$(i) && alpha$(str[q+1])) ||
             (i == ')' && str[q+1] == '[') ||
             (i == ']' && str[q+1] == '(') ||
@@ -414,11 +407,25 @@ std::string Tree::cat_string(std::string& str) {
             (i =='+' && str[q+1] == '(') ||
             (i == '+' && str[q+1] == '(') ||
             (i == '+' && str[q+1] == '[') ||
-            i == '+' && alpha$(str[q+1])
+            (i == '+' && alpha$(str[q+1])) ||
+            (i == ')' && str[q+1] == '%') ||
+            (i == ']' && str[q+1] == '%') ||
+            (i == '*' && str[q+1] == '%') ||
+            (i == '+' && str[q+1] == '%') ||
+            (alpha$(i) && str[q+1] == '%')
             ) {
                 res.push_back('.');
             }
         }
+
+        if (i == '%' && !alpha$(str[q+1])) {
+            if (str[q+1] != '{') {
+                res.push_back(str[q+1]);
+                q++;
+                res.push_back('.');
+            }
+        }
+
         if (i == '[') {
             size_t k = 0;
             for (size_t j = q+1; str[j] != ']'; j++) {
@@ -436,19 +443,11 @@ std::string Tree::cat_string(std::string& str) {
             }
             q += k;
         }
+
+        if (i == '.' && str[q+1] == '.' && str[q+2] == '.' ) {
+            q += 2;
+        }
     }
     res.append(")");
     return res;
 }
-
-
-
-
-
-
-
-
-
-
-
-

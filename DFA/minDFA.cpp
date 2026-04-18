@@ -2,20 +2,35 @@
 #include <iostream>
 #include <queue>
 
-bool DFA::match(std::string& str) {
+bool DFA::match(std::string str) {
     int state = start_state;
-    for (auto c : str) {
-        if (alphabet.find(c) != alphabet.end()) {
-            state = transitions[{state,c}];
-            //if (state == deadlock) { return false;}
-        } else {
-            return false;
+    if (lookahead == nullptr) {
+        for (auto c : str) {
+            if (alphabet.find(c) != alphabet.end()) {
+                state = transitions[{state,c}];
+                //if (state == deadlock) { return false;}
+            } else {
+                return false;
+            }
         }
+        return finaly_states.contains(state);
+    } else {
+        for (int i = 0; i < str.length(); i++) {
+            if (alphabet.find(str[i]) != alphabet.end()) {
+                state = transitions[{state,str[i]}];
+                if (finaly_states.contains(state)) {
+                    if (lookahead->match(str.substr(i+1))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
-    return finaly_states.contains(state);
 }
 
 std::string DFA::recovery() {
+    if (lookahead != nullptr) throw std::runtime_error("восстановления не будэт");
     for (auto& old : transitions) {
         std::string s(1,old.first.second);
         if (recovery_transitions.contains({old.first.first, old.second})) {
@@ -49,6 +64,7 @@ std::string DFA::recovery() {
                         std::string R_kk = recovery_transitions.contains({state, state}) ? recovery_transitions[{state, state}] : "";
                         std::string R_ij = recovery_transitions.contains({i, j}) ? recovery_transitions[{i, j}] : "";
 
+                        //(R_ij)|R_ik(R_kk)*R_kj
                         std::string new_path;
                         new_path += "(" + R_ik + ")";
                         if (!R_kk.empty()) {
@@ -82,23 +98,23 @@ std::string DFA::recovery() {
     return recovery_transitions[{new_start, new_end}];
 }
 
-void DFA::printDFA(){
-    for (auto& p : all_states) {
-        std::cout << p << " {";
-        std::cout << "} ";
-        if (finaly_states.contains(p)) std::cout << "true" << std::endl;
-        else std::cout << "false" << std::endl;
-    }
-
-    for (auto& p : transitions) {
-        std::cout << p.first.first << " {";
-        std::cout << p.first.second << "->";
-        std::cout << p.second << "}" << std::endl;
-    }
-
-    for (auto& p : all_states) std::cout << p << ","; std::cout << std::endl;
-
-    std::cout << start_state << std::endl;
-}
+// void DFA::printDFA(){
+//     for (auto& p : all_states) {
+//         std::cout << p << " {";
+//         std::cout << "} ";
+//         if (finaly_states.contains(p)) std::cout << "true" << std::endl;
+//         else std::cout << "false" << std::endl;
+//     }
+//
+//     for (auto& p : transitions) {
+//         std::cout << p.first.first << " {";
+//         std::cout << p.first.second << "->";
+//         std::cout << p.second << "}" << std::endl;
+//     }
+//
+//     for (auto& p : all_states) std::cout << p << ","; std::cout << std::endl;
+//
+//     std::cout << start_state << std::endl;
+// }
 
 

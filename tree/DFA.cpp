@@ -12,6 +12,7 @@ void DFABuilder::makeDFA() {
     count++;
     all_states.insert(help_set[t.get_root()->firstpos]);
     dont_mark_state.push(t.get_root()->firstpos);
+    if (t.get_root()->firstpos.contains(t.get_pos())) finaly_states.insert(0);
     while (!dont_mark_state.empty()) {
         std::set<int> S = dont_mark_state.front();
         for (auto a : t.get_alphabet()) {
@@ -104,11 +105,12 @@ void DFABuilder::minimization_by_Hopcroft() {
     }
     start_state = tr[0];
 
+    all_states.clear();
     for (int i = 0; i < P.size(); i++) {
-        new_all_states.insert(i);
+        all_states.insert(i);
     }
 
-    for (auto p : new_all_states) {
+    for (auto p : all_states) {
         bool f = false;
         for (auto ch : get_alphabet()) {
             if (new_map_tran.contains({p,ch})) {
@@ -123,27 +125,27 @@ void DFABuilder::minimization_by_Hopcroft() {
 }
 
 
-void DFABuilder::printDFA(){
-    for (auto& p : help_set) {
-        std::cout << p.second << " {";
-        for (auto a : p.first) {
-            std::cout << a << ",";
-        }
-        std::cout << "} ";
-        if (finaly_states.contains(p.second)) std::cout << "true" << std::endl;
-        else std::cout << "false" << std::endl;
-    }
-
-    for (auto& p : transitions) {
-        std::cout << p.first.first << " {";
-        std::cout << p.first.second << "->";
-        std::cout << p.second << "}" << std::endl;
-    }
-
-    for (auto& p : all_states) std::cout << p << ","; std::cout << std::endl;
-
-    std::cout << start_state << std::endl;
-}
+// void DFABuilder::printDFA(){
+//     for (auto& p : help_set) {
+//         std::cout << p.second << " {";
+//         for (auto a : p.first) {
+//             std::cout << a << ",";
+//         }
+//         std::cout << "} ";
+//         if (finaly_states.contains(p.second)) std::cout << "true" << std::endl;
+//         else std::cout << "false" << std::endl;
+//     }
+//
+//     for (auto& p : transitions) {
+//         std::cout << p.first.first << " {";
+//         std::cout << p.first.second << "->";
+//         std::cout << p.second << "}" << std::endl;
+//     }
+//
+//     for (auto& p : all_states) std::cout << p << ","; std::cout << std::endl;
+//
+//     std::cout << start_state << std::endl;
+// }
 
 std::set<int> DFABuilder::intersection_sets(std::set<int>& A, std::set<int>& B) {
     std::set<int> new_set;

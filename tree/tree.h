@@ -62,7 +62,6 @@ public:
     int get_pos() { return pos; }
     void make_range1(std::string& str);
     void make_range2(std::string& str);
-    //std::unique_ptr<Node> make_reg_node(std::unique_ptr<Node>& top);
     void postorder(std::unique_ptr<Node>& top);
     bool alpha(char ch);
     std::string cat_string(std::string& str);
